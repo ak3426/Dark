@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Anima Metamorphosis — 3D Multi-Phase Fire Visualizer</title>
+    <title>Anima Metamorphosis — System Audio Fire Visualizer</title>
     <style>
         html, body {
             margin: 0;
@@ -100,14 +100,14 @@ const fsSource = `#version 300 es
         return mat2(c, -s, s, c);
     }
 
-    // Volumetric 3D Fractal Noise - Internal evolution timeline slowed down
+    // Volumetric 3D Fractal Noise
     float noise3D(vec3 p) {
         return sin(p.x * 3.0 + u_time * 0.4) * cos(p.y * 3.0 - u_time * 0.5) * sin(p.z * 3.0 + u_time * 0.2);
     }
 
     // 3D Scene Geometry (Signed Distance Fields parsing multi-phase transitions)
     float map(vec3 p) {
-        // Continuous heavy rotation drift (Slower tracking)
+        // Continuous heavy rotation drift
         p.yz *= rot(0.15 + sin(u_time * 0.1) * 0.05);
         p.xz *= rot(u_time * 0.06);
 
@@ -183,13 +183,13 @@ const fsSource = `#version 300 es
             
             float diff = max(dot(n, l), 0.0);
 
-            // Calculate highly responsive glossy specular fire sparks
+            // Calculate glossy specular fire highlights
             vec3 viewDir = normalize(ro - p);
             vec3 reflectDir = reflect(-l, n);
             float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32.0);
 
             // MIXED CONVECTION FLAME GRADIENTS WITH CHILLING NEON BLUE
-            vec3 darkEmber    = vec3(0.12, 0.0, 0.02);   // Quiet shadow pockets
+            vec3 darkEmber    = vec3(1, 0.0, 0.02);   // Quiet shadow pockets
             vec3 electricBlue = vec3(0.0, 0.45, 0.95);   // Cool combustion grounding accent
             vec3 crimsonFire  = vec3(0.96, 0.05, 0.0);   // Expanding plasma boundaries
             vec3 solarGold    = vec3(1.0, 0.72, 0.02);   // Core thermal voice hits
@@ -219,7 +219,6 @@ const fsSource = `#version 300 es
         }
 
         // Add volumetric light density scatter tracking with ray loop iteration steps
-        // The aura smoke emissions are dual-toned red and blue
         float auraScatter = float(traceSteps) / 95.0;
         vec3 auraTone = mix(vec3(0.15, 0.02, 0.0), vec3(0.0, 0.03, 0.15), sin(u_time * 0.3) * 0.5 + 0.5);
         finalColor += auraTone * pow(auraScatter, 2.5) * (0.6 + u_vol * 2.0);
@@ -272,17 +271,33 @@ const trebleLoc = gl.getUniformLocation(program, "u_treble");
 
 let analyser, freqData, audioContextCreated = false;
 let sVol = 0, sBass = 0, sTreble = 0;
-const sm = 0.04; // Molasses-like low pass filter modifier
+const sm = 0.04; // Low pass filter smoothing modifier
 
 startBtn.addEventListener("click", async () => {
     if (audioContextCreated) return;
 
     try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        // Requests system screen/tab sharing window with system audio routing configured
+        const stream = await navigator.mediaDevices.getDisplayMedia({ 
+            video: true, 
+            audio: {
+                echoCancellation: false,
+                noiseSuppression: false,
+                autoGainControl: false
+            } 
+        });
+        
+        // Ensure user actually selected the "Share system audio" checkbox
+        if (stream.getAudioTracks().length === 0) {
+            alert("Please remember to check the 'Share system audio' or 'Share tab audio' checkbox inside the system popup container!");
+            stream.getTracks().forEach(track => track.stop());
+            return;
+        }
+
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         analyser = audioCtx.createAnalyser();
         analyser.fftSize = 512;
-        analyser.smoothingTimeConstant = 0.85; // Heavy audio integration dampener
+        analyser.smoothingTimeConstant = 0.85; 
         
         freqData = new Uint8Array(analyser.frequencyBinCount);
         const source = audioCtx.createMediaStreamSource(stream);
@@ -291,8 +306,8 @@ startBtn.addEventListener("click", async () => {
         startBtn.classList.add("active");
         audioContextCreated = true;
     } catch (err) {
-        console.error("Microphone pipeline link error:", err);
-        startBtn.textContent = "Error Accessing Mic";
+        console.error("System audio routing pipeline setup link error:", err);
+        startBtn.textContent = "Error Accessing Audio";
     }
 });
 
@@ -337,7 +352,9 @@ function animate(timestamp) {
 
     const delta = (timestamp - lastTime) * 0.001;
     lastTime = timestamp;
-    t += delta * 0.7; // Scale global engine speed downward for slow transformation
+    
+    // UPDATED SPEED VALUE: Sped up from 0.5 to 0.8 for snappy, interactive fire responses
+    t += delta * 0.8; 
 
     let rawAudio = processAudioData();
 
