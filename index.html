@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Anima Spectrum — Deep Noir Fluid Field</title>
+    <title>Anima Cordis — 3D Anatomical Heart Visualizer</title>
     <style>
         html, body {
             margin: 0;
             padding: 0;
             overflow: hidden;
-            background: #000002; /* Absolute Pitch Black Abyss */
+            background: #000000; /* Absolute Pitch Black Abyss */
             height: 100vh;
             width: 100vw;
         }
@@ -24,7 +24,7 @@
             z-index: 1;
         }
 
-        /* Minimalist Start Trigger Overlay */
+        /* Minimalist Activation Trigger Overlay */
         #ui {
             position: absolute;
             top: 50%;
@@ -35,9 +35,9 @@
 
         button {
             padding: 22px 44px;
-            background: rgba(2, 0, 5, 0.95);
-            border: 1px solid rgba(130, 0, 255, 0.3);
-            color: rgba(180, 100, 255, 0.85);
+            background: rgba(5, 0, 0, 0.95);
+            border: 1px solid rgba(255, 30, 30, 0.3);
+            color: rgba(255, 80, 80, 0.85);
             cursor: pointer;
             font-family: Arial, sans-serif;
             font-size: 11px;
@@ -48,10 +48,10 @@
         }
 
         button:hover {
-            background: #4b0082;
-            border-color: #00ffff;
+            background: #400005;
+            border-color: #ff003c;
             color: #fff;
-            box-shadow: 0 0 60px rgba(130, 0, 255, 0.45), 0 0 20px rgba(0, 255, 255, 0.3);
+            box-shadow: 0 0 60px rgba(255, 0, 60, 0.4);
         }
 
         button.active {
@@ -64,18 +64,18 @@
 <body>
 
 <div id="ui">
-    <button id="startBtn">Enter The Void</button>
+    <button id="startBtn">Awaken Organism</button>
 </div>
 
 <canvas id="canvas3d"></canvas>
 
 <script>
 const canvas = document.getElementById("canvas3d");
-const gl = canvas.getContext WebGL2RenderingContext ? canvas.getContext("webgl2") : null;
+const gl = canvas.getContext("webgl2");
 const startBtn = document.getElementById("startBtn");
 
 if (!gl) {
-    alert("WebGL 2 context initialization failed.");
+    alert("WebGL 2 is required for this real-time 3D raymarched installation.");
 }
 
 const vsSource = `#version 300 es
@@ -100,46 +100,57 @@ const fsSource = `#version 300 es
         return mat2(c, -s, s, c);
     }
 
-    // Volumetric 3D Fractal Noise to create multi-body shattered energy artifacts
-    float noise3D(vec3 p) {
-        return sin(p.x * 2.8 + u_time) * cos(p.y * 3.2 - u_time * 1.2) * sin(p.z * 2.5 + u_time * 0.7);
+    // Smooth minimum helper function for organic biological blending
+    float smin(float d1, float d2, float k) {
+        float h = clamp(0.5 + 0.5 * (d2 - d1) / k, 0.0, 1.0);
+        return mix(d2, d1, h) - k * h * (1.0 - h);
     }
 
-    // 3D Scene Geometry (Signed Distance Fields parsing dark metamorphic transitions)
+    // 3D Scene Geometry (Anatomical Human Heart Matrix Model)
     float map(vec3 p) {
-        // Continuous slow spatial camera drift matrix
-        p.yz *= rot(0.2 + sin(u_time * 0.15) * 0.12);
-        p.xz *= rot(u_time * 0.12);
+        // Slow cinematic camera float rotation matrix
+        p.yz *= rot(-0.15 + sin(u_time * 0.3) * 0.05);
+        p.xz *= rot(u_time * 0.2);
 
-        // TRANSFORMATION 1: The Resting Helix Core
-        vec3 pHelix = p;
-        pHelix.xz *= rot(pHelix.y * 2.2 + u_time * 1.0);
-        float helixCore = length(pHelix.xz) - (0.13 + u_vol * 0.08);
-
-        // TRANSFORMATION 2: Nebula Dispersion (Bass blast outward shattering forces)
-        vec3 pNebula = p;
-        float expansionForce = u_bass * 1.5;
-        float nebulaField = length(pNebula) - (0.42 + expansionForce);
-
-        // TRANSFORMATION 3: High-Treble Tornado Vortex (Spiraling razor cords)
-        vec3 pVortex = p;
-        pVortex.xz *= rot(u_time * 4.5 + pVortex.y * 5.0 * (1.0 + u_treble * 2.5));
-        float vortexField = length(pVortex.xz) - (0.07 + u_treble * 0.35);
-
-        // Blend all mathematical states seamlessly based on voice properties
-        float blendedState = mix(helixCore, nebulaField, min(u_bass * 1.4, 1.0));
-        blendedState = mix(blendedState, vortexField, min(u_treble * 1.6, 1.0));
-
-        // Fracture the solid structure into thousands of floating kinetic droplets
-        float fractureWaves = sin(p.x * 12.0) * cos(p.y * 12.0) * sin(p.z * 12.0) * (0.09 + u_vol * 0.4);
+        // Standard heartbeat baseline contraction + loud vocal volume scaling
+        float contraction = sin(u_time * 4.5) * 0.04 + (u_bass * 0.25);
         
-        // Add deep structural fractal noise mapping
-        float microDetail = noise3D(p * 2.2) * (0.05 + u_treble * 0.25);
+        // Isolate coordinate spaces for asymmetric biological structures
+        vec3 pVentricle = p - vec3(0.0, -0.15, 0.0);
+        
+        // Twist coordinates slightly to form the natural apex twist of a real heart
+        pVentricle.xz *= rot(pVentricle.y * 0.4);
 
-        return blendedState + fractureWaves + microDetail;
+        // Form the main lower muscular ventricle chamber body (Asymmetric Egg/Spheroid)
+        pVentricle.y *= 1.25; // Elongate vertically
+        float ventricles = length(pVentricle) - (0.42 + contraction);
+        
+        // Flatten the back and side walls slightly to match actual ventricular geometry
+        ventricles += sin(p.x * 3.0) * cos(p.y * 2.0) * 0.03;
+
+        // Form the upper Aorta arch tree conduit
+        vec3 pAorta = p - vec3(-0.08, 0.35, -0.05);
+        pAorta.xy *= rot(0.3); // Angle the aortic root outward
+        float aortaBase = length(pAorta.xz) - (0.11 + u_vol * 0.03);
+        float aortaBounds = max(aortaBase, pAorta.y - 0.3); // Cap vertical pipe lengths
+        
+        // Form secondary Pulmonary Artery branch pipelines
+        vec3 pPulmonary = p - vec3(0.12, 0.28, 0.05);
+        pPulmonary.xy *= rot(-0.4);
+        float pulmonaryBase = length(pPulmonary.xz) - (0.09 + u_vol * 0.02);
+        float pulmonaryBounds = max(pulmonaryBase, pPulmonary.y - 0.25);
+
+        // Chemically fuse structural vessels onto the ventricular muscle block organics cleanly
+        float anatomyBase = smin(ventricles, aortaBounds, 0.12);
+        anatomyBase = smin(anatomyBase, pulmonaryBounds, 0.1);
+
+        // Inject surface texture (muscular fiber tissue ridges + treble-flickering veins)
+        float fibers = sin(p.x * 15.0 + p.y * 10.0) * cos(p.z * 15.0) * (0.015 + u_treble * 0.04);
+        
+        return anatomyBase - fibers;
     }
 
-    // Generate directional surface angles to capture dark iridescent highlights
+    // Generate directional normals to catch high-drama rim shadows and chrome glints
     vec3 getNormal(vec3 p) {
         vec2 e = vec2(0.002, 0.0);
         return normalize(vec3(
@@ -149,84 +160,78 @@ const fsSource = `#version 300 es
         ));
     }
 
-    // Custom dark psychedelic cosine color generator palette 
-    vec3 getSpectralPalette(float t, float audioModifier) {
-        // Base dark noir color weights (Obsidian, Cosmic Purple, Electric Cyan, Volcanic Crimson, Hot Gold)
-        vec3 a = vec3(0.15, 0.0, 0.2); 
-        vec3 b = vec3(0.65, 0.5, 0.4);
-        vec3 c = vec3(1.0, 1.0, 1.0);
-        vec3 d = vec3(0.0, 0.33, 0.67) + vec3(audioModifier * 0.4, -audioModifier * 0.2, audioModifier * 0.5);
-        return a + b * cos(6.28318 * (c * t + d));
-    }
-
     void main() {
         vec2 uv = (gl_FragCoord.xy - 0.5 * u_resolution.xy) / u_resolution.y;
         
-        // Project Raycasting Camera depths
-        vec3 ro = vec3(0.0, 0.0, -2.5); 
-        vec3 rd = normalize(vec3(uv * 1.1, 1.0)); 
+        // Trace camera vector pipelines
+        vec3 ro = vec3(0.0, 0.1, -2.4); 
+        vec3 rd = normalize(vec3(uv * 1.15, 1.0)); 
 
         float dO = 0.0;
         vec3 p;
         bool hit = false;
         int traceSteps = 0;
 
-        // Perform raymarching deep into the fractal space fields
-        for(int i = 0; i < 95; i++) {
+        // Perform raymarching deep intersections
+        for(int i = 0; i < 90; i++) {
             p = ro + rd * dO;
             float dS = map(p);
             dO += dS;
             traceSteps = i;
-            if(dO > 8.0 || abs(dS) < 0.0005) {
-                if(abs(dS) < 0.0005) hit = true;
+            if(dO > 7.0 || abs(dS) < 0.0006) {
+                if(abs(dS) < 0.0006) hit = true;
                 break;
             }
         }
 
-        // Initialize pitch black cyber-noir abyss backdrop color
-        vec3 finalColor = vec3(0.001, 0.0, 0.003);
+        // Initialize pitch black void frame canvas backdrop
+        vec3 finalColor = vec3(0.0, 0.0, 0.0);
 
         if(hit) {
             vec3 n = getNormal(p);
-            vec3 lightPos = vec3(2.0, 4.0, -3.0);
+            vec3 lightPos = vec3(2.5, 4.0, -3.0); // Harsh overhead dramatic pinpoint light source
             vec3 l = normalize(lightPos - p);
             
             float diff = max(dot(n, l), 0.0);
 
-            // Compute sharp specular glare lines mimicking black glass chrome finish
+            // High specular coefficient mimicking wet, gloss-coated anatomical muscle tissue
             vec3 viewDir = normalize(ro - p);
             vec3 reflectDir = reflect(-l, n);
-            float spec = pow(max(dot(viewDir, reflectDir), 0.0), 64.0);
+            float spec = pow(max(dot(viewDir, reflectDir), 0.0), 48.0);
 
-            // Dynamically evaluate shifting spectral colors based on spatial position and vocal energy
-            float colorTrack = length(p.xyz) * 0.4 - u_time * 0.25 + u_vol * 0.5;
-            vec3 baseSpectralColor = getSpectralPalette(colorTrack, u_bass);
+            // DARK MEDICAL CYBER-NOIR PALETTE
+            vec3 obsidianCharcoal = vec3(0.06, 0.03, 0.04); // Core flesh base tone under shadows
+            vec3 oxygenatedBlood  = vec3(0.85, 0.02, 0.08); // Flashing arterial muscle tissue
+            vec3 bioElectricNeon  = vec3(0.55, 0.0, 0.95);  // High treble electrical pulse color
+            vec3 hotGlint          = vec3(1.0, 0.95, 0.97);  // White specular surface moisture flash
 
-            // Deep noir shadow multiplier: keeps indented cracks completely dark for high drama
-            float shadowDepth = smoothstep(0.0, 1.0, diff);
-            vec3 dynamicShading = baseSpectralColor * (diff * 0.95 + 0.08);
+            // Map base color alterations directly to overall vocal volume tracking metrics
+            vec3 activeTissueColor = mix(obsidianCharcoal, oxygenatedBlood, min(u_vol * 3.5, 1.0));
+            
+            // Send deep neon-purple bio-electric surges along the tissue walls on sharp high note spikes
+            activeTissueColor = mix(activeTissueColor, bioElectricNeon, min(u_treble * 2.5, 1.0));
 
-            // Add ultra-sharp white-hot highlight spikes along reflective ridges
-            vec3 hyperWhite = vec3(0.95, 0.98, 1.0);
-            dynamicShading += hyperWhite * spec * (0.9 + u_vol * 1.8);
+            // Accumulate directional structural lightning models
+            vec3 lightComposition = activeTissueColor * (diff * 0.95 + 0.08);
+            
+            // Inject hyper-bright mirror highlight reflections across muscle contours
+            lightComposition += hotGlint * spec * (0.6 + u_vol * 1.5);
+            
+            // Intense edge Fresnel rim halo framing representing atmospheric energy emission boundaries
+            float rim = pow(1.0 - max(dot(n, viewDir), 0.0), 3.2);
+            lightComposition += mix(oxygenatedBlood, bioElectricNeon, u_treble) * rim * (0.35 + u_bass * 0.85);
 
-            // Fresnel rim halo framing that cycles neon colors dramatically on vocal spikes
-            float rim = pow(1.0 - max(dot(n, viewDir), 0.0), 3.0);
-            vec3 neonRimColor = getSpectralPalette(colorTrack + 0.5, u_treble * 1.5);
-            dynamicShading += neonRimColor * rim * (0.4 + u_bass * 1.0);
-
-            finalColor = dynamicShading;
+            finalColor = lightComposition;
         }
 
-        // Volumetric light scattering smoke aura tracing path history iterations
-        // Shifted color parameters to generate a dark, cosmic neon-purple atmospheric bleed
-        float auraScatter = float(traceSteps) / 95.0;
-        vec3 darkAtmosphere = vec3(0.06, 0.0, 0.14) + vec3(u_bass * 0.15, 0.0, u_treble * 0.1);
-        finalColor += darkAtmosphere * pow(auraScatter, 2.2) * (0.7 + u_vol * 2.5);
+        // Volumetric atmospheric scatter bleed generating a dark, localized cardiac vapor cloud effect
+        float auraScatter = float(traceSteps) / 90.0;
+        vec3 darkHeartAura = vec3(0.07, 0.0, 0.02) + vec3(u_bass * 0.12, 0.0, u_treble * 0.08);
+        finalColor += darkHeartAura * pow(auraScatter, 2.5) * (0.6 + u_vol * 2.5);
 
-        // Intensely heavy vignette framing to cement the dark, isolated shadow look
+        // Intensely heavy vignette framing to isolate the organ inside the void darkness frame
         float vignette = uv.x * uv.x + uv.y * uv.y;
-        finalColor *= vec3(1.0 - vignette * 0.65);
+        finalColor *= (1.0 - vignette * 0.7);
 
         fragColor = vec4(finalColor, 1.0);
     }
@@ -272,7 +277,7 @@ const trebleLoc = gl.getUniformLocation(program, "u_treble");
 
 let analyser, freqData, audioContextCreated = false;
 let sVol = 0, sBass = 0, sTreble = 0;
-const sm = 0.12; // High-inertia rapid tracking variable
+const sm = 0.12; // High-inertia reactive smoothing coefficient
 
 startBtn.addEventListener("click", async () => {
     if (audioContextCreated) return;
@@ -282,7 +287,7 @@ startBtn.addEventListener("click", async () => {
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         analyser = audioCtx.createAnalyser();
         analyser.fftSize = 512;
-        analyser.smoothingTimeConstant = 0.68; // Hyper-reactive kinetic movement tracking
+        analyser.smoothingTimeConstant = 0.7; // Fast responsive biometric transformation processing
         
         freqData = new Uint8Array(analyser.frequencyBinCount);
         const source = audioCtx.createMediaStreamSource(stream);
@@ -291,7 +296,7 @@ startBtn.addEventListener("click", async () => {
         startBtn.classList.add("active");
         audioContextCreated = true;
     } catch (err) {
-        console.error("Microphone pipeline link error:", err);
+        console.error("Microphone hardware configuration access failure:", err);
         startBtn.textContent = "Error Accessing Mic";
     }
 });
@@ -346,13 +351,13 @@ function animate(timestamp) {
         sBass = sBass * (1 - sm) + rawAudio.bass * sm;
         sTreble = sTreble * (1 - sm) + rawAudio.treble * sm;
     } else {
-        // Ambient resting cosmic fluid drift mechanics pre-activation
-        sVol = sVol * 0.96 + 0.05 * 0.04;
-        sBass = sBass * 0.96 + 0.07 * 0.04;
-        sTreble = sTreble * 0.96 + 0.03 * 0.04;
+        // Continuous organic background cardiac expansion cycling pre-click
+        sVol = sVol * 0.95 + 0.04 * 0.05;
+        sBass = sBass * 0.95 + 0.06 * 0.05;
+        sTreble = sTreble * 0.95 + 0.03 * 0.05;
     }
 
-    gl.clearColor(0.001, 0.0, 0.003, 1.0);
+    gl.clearColor(0.0, 0.0, 0.0, 1.0);
     gl.clear(gl.COLOR_BUFFER_BIT);
 
     gl.useProgram(program);
@@ -361,8 +366,8 @@ function animate(timestamp) {
     gl.uniform2f(resLoc, gl.canvas.width, gl.canvas.height);
     gl.uniform1f(timeLoc, t);
     gl.uniform1f(volLoc, sVol * 4.5);
-    gl.uniform1f(bassLoc, sBass * 4.2);
-    gl.uniform1f(trebleLoc, sTreble * 5.2);
+    gl.uniform1f(bassLoc, sBass * 4.0);
+    gl.uniform1f(trebleLoc, sTreble * 5.0);
 
     gl.drawArrays(gl.TRIANGLES, 0, 6);
 }
