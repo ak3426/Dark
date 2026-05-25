@@ -189,11 +189,11 @@ const fsSource = `#version 300 es
             float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32.0);
 
             // MIXED CONVECTION FLAME GRADIENTS WITH CHILLING NEON BLUE
-            vec3 darkEmber    = vec3(1, 0.0, 0.02);   // Quiet shadow pockets
-            vec3 electricBlue = vec3(0.0, 0.45, 0.95);   // Cool combustion grounding accent
-            vec3 crimsonFire  = vec3(0.96, 0.05, 0.0);   // Expanding plasma boundaries
+            vec3 darkEmber    = vec3(1, 0.0, 0.0);   // Quiet shadow pockets
+            vec3 electricBlue = vec3(1.0, 0.45, 0.95);   // Cool combustion grounding accent
+            vec3 crimsonFire  = vec3(1.0, 0.0, 0.0);   // Expanding plasma boundaries
             vec3 solarGold    = vec3(1.0, 0.72, 0.02);   // Core thermal voice hits
-            vec3 hyperWhite   = vec3(1.0, 0.98, 0.95);   // Blinding focal glints
+            vec3 hyperWhite   = vec3(1.0, 0.05, 0.02);   // Blinding focal glints
 
             // Transition color metrics depending entirely on global volume amplitude
             vec3 combustionColor = mix(darkEmber, crimsonFire, min(u_vol * 3.5, 1.0));
@@ -354,7 +354,7 @@ function animate(timestamp) {
     lastTime = timestamp;
     
     // UPDATED SPEED VALUE: Sped up from 0.5 to 0.8 for snappy, interactive fire responses
-    t += delta * 0.8; 
+    t += delta ; 
 
     let rawAudio = processAudioData();
 
