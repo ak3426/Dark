@@ -337,7 +337,7 @@ function animate(timestamp) {
 
     const delta = (timestamp - lastTime) * 0.001;
     lastTime = timestamp;
-    t += delta * 0.5; // Scale global engine speed downward for slow transformation
+    t += delta * 0.7; // Scale global engine speed downward for slow transformation
 
     let rawAudio = processAudioData();
 
