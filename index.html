@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Anima Metamorphosis — Fire & Blue Flame Visualizer</title>
+    <title>Anima Metamorphosis — 3D Multi-Phase Fire Visualizer</title>
     <style>
         html, body {
             margin: 0;
             padding: 0;
             overflow: hidden;
-            background: #010002; /* Deep Black Void */
+            background: #000103; /* Deep Blue-Black Void */
             height: 100vh;
             width: 100vw;
         }
@@ -24,7 +24,7 @@
             z-index: 1;
         }
 
-        /* Minimalist Start Overlay Container */
+        /* Minimalist Start Overlay */
         #ui {
             position: absolute;
             top: 50%;
@@ -35,9 +35,9 @@
 
         button {
             padding: 20px 40px;
-            background: rgba(15, 5, 0, 0.95);
-            border: 1px solid rgba(255, 100, 0, 0.35);
-            color: rgba(255, 160, 100, 0.9);
+            background: rgba(0, 3, 10, 0.95);
+            border: 1px solid rgba(255, 60, 0, 0.35);
+            color: rgba(255, 120, 50, 0.9);
             cursor: pointer;
             font-family: Arial, sans-serif;
             font-size: 11px;
@@ -48,10 +48,10 @@
         }
 
         button:hover {
-            background: #8f2300;
-            border-color: #00e5ff;
+            background: #a62c00;
+            border-color: #00d9ff;
             color: #fff;
-            box-shadow: 0 0 50px rgba(255, 94, 0, 0.55);
+            box-shadow: 0 0 50px rgba(255, 60, 0, 0.55);
         }
 
         button.active {
@@ -70,22 +70,22 @@
 <canvas id="canvas3d"></canvas>
 
 <script>
-    const canvas = document.getElementById("canvas3d");
-    const gl = canvas.getContext("webgl2");
-    const startBtn = document.getElementById("startBtn");
+const canvas = document.getElementById("canvas3d");
+const gl = canvas.getContext("webgl2");
+const startBtn = document.getElementById("startBtn");
 
-    if (!gl) {
-        alert("WebGL 2 context initialization failed.");
-    }
+if (!gl) {
+    alert("WebGL 2 context initialization failed.");
+}
 
-    const vsSource = `#version 300 es
+const vsSource = `#version 300 es
     in vec2 position;
     void main() {
         gl_Position = vec4(position, 0.0, 1.0);
     }
-    `;
+`;
 
-    const fsSource = `#version 300 es
+const fsSource = `#version 300 es
     precision highp float;
     out vec4 fragColor;
 
@@ -100,62 +100,46 @@
         return mat2(c, -s, s, c);
     }
 
-    float smin(float d1, float d2, float k) {
-        float h = clamp(0.5 + 0.5 * (d2 - d1) / k, 0.0, 1.0);
-        return mix(d2, d1, h) - k * h * (1.0 - h);
-    }
-
-    // Volumetric 3D Noise - Used to sculpt the anatomical heart texture
+    // Volumetric 3D Fractal Noise - Internal evolution timeline slowed down
     float noise3D(vec3 p) {
-        return sin(p.x * 2.8 + u_time * 0.3) * cos(p.y * 3.2 - u_time * 0.4) * sin(p.z * 2.5 + u_time * 0.2);
+        return sin(p.x * 3.0 + u_time * 0.4) * cos(p.y * 3.0 - u_time * 0.5) * sin(p.z * 3.0 + u_time * 0.2);
     }
 
-    // 3D Scene Geometry (Anatomical Human Heart Matrix)
+    // 3D Scene Geometry (Signed Distance Fields parsing multi-phase transitions)
     float map(vec3 p) {
-        // Slow cinematic camera float rotation matrix
-        p.yz *= rot(-0.1 + sin(u_time * 0.2) * 0.04);
-        p.xz *= rot(u_time * 0.15);
+        // Continuous heavy rotation drift (Slower tracking)
+        p.yz *= rot(0.15 + sin(u_time * 0.1) * 0.05);
+        p.xz *= rot(u_time * 0.06);
 
-        // Contraction scaling driven by low bass frequencies (pumping motion)
-        float contraction = sin(u_time * 3.5) * 0.03 + (u_bass * 0.18);
-        
-        // Isolate coordinate spaces for asymmetric biological structures
-        vec3 pVentricle = p - vec3(0.0, -0.12, 0.0);
-        pVentricle.xz *= rot(pVentricle.y * 0.3); // Apply inherent biological twist
-        pVentricle.y *= 1.2; // Elongate to anatomical shape
+        // TRANSFORMATION STEP 1: Core helix structural track coordinates
+        vec3 pHelix = p;
+        pHelix.xz *= rot(pHelix.y * 2.5 + u_time * 0.4);
+        float helixCore = length(pHelix.xz) - (0.12 + u_vol * 0.1);
 
-        // Form the main lower muscular ventricle chamber body (Asymmetric Egg Spheroid)
-        float ventricles = length(pVentricle) - (0.4 + contraction * 0.8) * (1.0 - smoothstep(0.4, 0.8, abs(p.y)));
-        
-        // Muscle fiber ridges reacting to bass
-        ventricles -= sin(p.x * 12.0) * cos(p.y * 8.0) * (0.005 + u_bass * 0.015);
+        // TRANSFORMATION STEP 2: The Nebula Dispersion (Outward force driven smoothly by bass)
+        vec3 pNebula = p;
+        float expansionForce = u_bass * 1.4;
+        float nebulaField = length(pNebula) - (0.45 + expansionForce);
 
-        // Form the upper Aorta arch tree conduit
-        vec3 pAorta = p - vec3(-0.06, 0.38, -0.05);
-        pAorta.xy *= rot(0.25); // Angle aortic root
-        float aortaBase = length(pAorta.xz) - (0.12 + u_vol * 0.03);
-        float aortaBounds = max(aortaBase, pAorta.y - 0.25);
-        
-        // Form Pulmonary Artery branches pipelines
-        vec3 pPulmonary = p - vec3(0.1, 0.3, 0.05);
-        pPulmonary.xy *= rot(-0.3);
-        float pulmonaryBase = length(pPulmonary.xz) - (0.09 + u_vol * 0.02);
-        float pulmonaryBounds = max(pulmonaryBase, pPulmonary.y - 0.22);
+        // TRANSFORMATION STEP 3: High-Treble Tornado Vortex (Subdued twist speed)
+        vec3 pVortex = p;
+        pVortex.xz *= rot(u_time * 1.2 + pVortex.y * 6.0 * (1.0 + u_treble * 1.5));
+        float vortexField = length(pVortex.xz) - (0.08 + u_treble * 0.3);
 
-        // Chemically fuse structural vessels onto the ventricle organics flawlessly
-        float anatomyBase = smin(ventricles, aortaBounds, 0.1);
-        anatomyBase = smin(anatomyBase, pulmonaryBounds, 0.08);
+        // Blend mathematical states into one fluid system
+        float blendedState = mix(helixCore, nebulaField, min(u_bass * 1.5, 1.0));
+        blendedState = mix(blendedState, vortexField, min(u_treble * 1.8, 1.0));
 
-        // The veining/electrical network layer reacting to treble notes
-        float veins = sin(p.x * 25.0 + p.y * 15.0 + p.z * 20.0 + u_time * 1.5) * (0.008 + u_treble * 0.03);
+        // Fracture the solid structure into floating fluid fire globules
+        float fractureWaves = sin(p.x * 14.0) * cos(p.y * 14.0) * sin(p.z * 14.0) * (0.08 + u_vol * 0.35);
         
-        // Final surface texture fusing
-        float fibers = noise3D(p * 2.0) * 0.01;
-        
-        return anatomyBase - veins - fibers;
+        // Complex surface details moving down a slower timeline
+        float microDetail = noise3D(p * 2.5) * (0.04 + u_treble * 0.2);
+
+        return blendedState + fractureWaves + microDetail;
     }
 
-    // Generate directional surface angles to capture complex reflections
+    // Generate directional surface angles to capture complex flame illumination highlights
     vec3 getNormal(vec3 p) {
         vec2 e = vec2(0.002, 0.0);
         return normalize(vec3(
@@ -168,220 +152,221 @@
     void main() {
         vec2 uv = (gl_FragCoord.xy - 0.5 * u_resolution.xy) / u_resolution.y;
         
-        // Raycasting Camera definitions
-        vec3 ro = vec3(0.0, 0.1, -2.4); 
-        vec3 rd = normalize(vec3(uv * 1.2, 1.0)); 
+        // Project Raycasting Camera depths
+        vec3 ro = vec3(0.0, 0.0, -2.4); 
+        vec3 rd = normalize(vec3(uv * 1.1, 1.0)); 
 
         float dO = 0.0;
         vec3 p;
         bool hit = false;
         int traceSteps = 0;
 
-        // Perform raymarching intersections deep within the coordinate fields
-        for(int i = 0; i < 90; i++) {
+        // Perform intensive raymarching operations across the fragment fields
+        for(int i = 0; i < 95; i++) {
             p = ro + rd * dO;
             float dS = map(p);
             dO += dS;
             traceSteps = i;
-            if(dO > 7.0 || abs(dS) < 0.0006) {
+            if(dO > 8.0 || abs(dS) < 0.0006) {
                 if(abs(dS) < 0.0006) hit = true;
                 break;
             }
         }
 
-        // Initialize spatial void background canvas color
-        vec3 finalColor = vec3(0.001, 0.0, 0.002);
+        // Initialize spatial void background canvas color (Dark blue-shifted void)
+        vec3 finalColor = vec3(0.0, 0.002, 0.01);
 
         if(hit) {
             vec3 n = getNormal(p);
-            vec3 lightPos = vec3(1.5, 4.0, -2.5); // Directional fire light position
+            vec3 lightPos = vec3(1.5, 4.0, -2.5);
             vec3 l = normalize(lightPos - p);
             
             float diff = max(dot(n, l), 0.0);
 
-            // Specular highlighting calculation producing hyper-polished glossy fire reflections
+            // Calculate highly responsive glossy specular fire sparks
             vec3 viewDir = normalize(ro - p);
             vec3 reflectDir = reflect(-l, n);
             float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32.0);
 
-            // THERMAL INFERNO PALETTE WITH BLUE FIRE ACCENTS
-            vec3 darkEmber   = vec3(0.12, 0.0, 0.01);   // Quiet charcoal background
-            vec3 blazingRed  = vec3(0.96, 0.05, 0.0);   // Expanding plasma base color
-            vec3 solarYellow = vec3(1.0, 0.72, 0.02);   // Blazing high energy core
-            vec3 electricBlue = vec3(0.0, 0.35, 1.0);   // Treble-reactive electrical pulse
-            vec3 hotGlint    = vec3(1.0, 0.98, 0.95);   // White-hot focal spots
+            // MIXED CONVECTION FLAME GRADIENTS WITH CHILLING NEON BLUE
+            vec3 darkEmber    = vec3(0.12, 0.0, 0.02);   // Quiet shadow pockets
+            vec3 electricBlue = vec3(0.0, 0.45, 0.95);   // Cool combustion grounding accent
+            vec3 crimsonFire  = vec3(0.96, 0.05, 0.0);   // Expanding plasma boundaries
+            vec3 solarGold    = vec3(1.0, 0.72, 0.02);   // Core thermal voice hits
+            vec3 hyperWhite   = vec3(1.0, 0.98, 0.95);   // Blinding focal glints
 
-            // Mix primary fire gradients based on overall volume amplitude
-            vec3 combustionColor = mix(darkEmber, blazingRed, min(u_vol * 3.5, 1.0));
+            // Transition color metrics depending entirely on global volume amplitude
+            vec3 combustionColor = mix(darkEmber, crimsonFire, min(u_vol * 3.5, 1.0));
             
-            // Integrate blazing yellow-gold into the mixture as frequencies climb
-            combustionColor = mix(combustionColor, solarYellow, min(u_treble * 2.8, 1.0));
-            
-            // Inject electric blue current streams when sibilance/higher-vocal tones spike
-            combustionColor = mix(combustionColor, electricBlue, min(u_treble * 2.5, 1.0));
+            // Overdrive the color values into pure yellow-gold when treble registers explode
+            combustionColor = mix(combustionColor, solarGold, min(u_treble * 2.8, 1.0));
 
-            // Merge dynamic 3D shading models
+            // Seamlessly bleed blue into the midtone fire signatures based on audio tracking
+            combustionColor = mix(combustionColor, electricBlue, clamp(u_bass * 1.2 - u_treble * 0.5, 0.0, 0.6));
+
+            // Merge shading components together
             vec3 dynamicShading = combustionColor * (diff * 0.9 + 0.2);
             
-            // Inject sharp white-hot mirror reflections to mimic blinding solar bursts
-            dynamicShading += hotGlint * spec * (0.8 + u_vol * 1.5);
+            // Inject white-hot highlight sparks along fragment surfaces
+            dynamicShading += hyperWhite * spec * (0.75 + u_vol * 1.5);
             
-            // Fresnel rim halo calculation to isolate individual anatomical contours cleanly
+            // Fresnel rim halo calculation showing fire gradients meeting blue horizons
             float rim = pow(1.0 - max(dot(n, viewDir), 0.0), 3.0);
-            dynamicShading += mix(blazingRed, electricBlue, u_treble) * rim * (0.35 + u_bass * 0.8);
+            vec3 rimColor = mix(crimsonFire, electricBlue, sin(u_time * 0.5) * 0.5 + 0.5);
+            dynamicShading += mix(rimColor, solarGold, u_treble) * rim * (0.35 + u_bass * 0.8);
 
             finalColor = dynamicShading;
         }
 
         // Add volumetric light density scatter tracking with ray loop iteration steps
-        float auraScatter = float(traceSteps) / 90.0;
-        finalColor += vec3(0.15, 0.02, 0.0) * pow(auraScatter, 2.5) * (0.6 + u_vol * 2.0);
+        // The aura smoke emissions are dual-toned red and blue
+        float auraScatter = float(traceSteps) / 95.0;
+        vec3 auraTone = mix(vec3(0.15, 0.02, 0.0), vec3(0.0, 0.03, 0.15), sin(u_time * 0.3) * 0.5 + 0.5);
+        finalColor += auraTone * pow(auraScatter, 2.5) * (0.6 + u_vol * 2.0);
 
-        // Smooth cinematic focus vignette framing borders
+        // Smooth cinematic focus vignette framing
         float vignette = uv.x * uv.x + uv.y * uv.y;
         finalColor *= (1.0 - vignette * 0.5);
 
         fragColor = vec4(finalColor, 1.0);
     }
-    `;
+`;
 
-    function createShader(gl, type, source) {
-        const shader = gl.createShader(type);
-        gl.shaderSource(shader, source);
-        gl.compileShader(shader);
-        if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-            console.error(gl.getShaderInfoLog(shader));
-            gl.deleteShader(shader);
-            return null;
-        }
-        return shader;
+function createShader(gl, type, source) {
+    const shader = gl.createShader(type);
+    gl.shaderSource(shader, source);
+    gl.compileShader(shader);
+    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+        console.error(gl.getShaderInfoLog(shader));
+        gl.deleteShader(shader);
+        return null;
     }
+    return shader;
+}
 
-    const vs = createShader(gl, gl.VERTEX_SHADER, vsSource);
-    const fs = createShader(gl, gl.FRAGMENT_SHADER, fsSource);
-    const program = gl.createProgram();
-    gl.attachShader(program, vs);
-    gl.attachShader(program, fs);
-    gl.linkProgram(program);
+const vs = createShader(gl, gl.VERTEX_SHADER, vsSource);
+const fs = createShader(gl, gl.FRAGMENT_SHADER, fsSource);
+const program = gl.createProgram();
+gl.attachShader(program, vs);
+gl.attachShader(program, fs);
+gl.linkProgram(program);
 
-    const positionAttributeLocation = gl.getAttribLocation(program, "position");
-    const positionBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
-        -1, -1, 1, -1, -1, 1,
-        -1, 1, 1, -1, 1, 1,
-    ]), gl.STATIC_DRAW);
+const positionAttributeLocation = gl.getAttribLocation(program, "position");
+const positionBuffer = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+    -1, -1,   1, -1,  -1,  1,
+    -1,  1,   1, -1,   1,  1,
+]), gl.STATIC_DRAW);
 
-    const vao = gl.createVertexArray();
-    gl.bindVertexArray(vao);
-    gl.enableVertexAttribArray(positionAttributeLocation);
-    gl.vertexAttribPointer(positionAttributeLocation, 2, gl.FLOAT, false, 0, 0);
+const vao = gl.createVertexArray();
+gl.bindVertexArray(vao);
+gl.enableVertexAttribArray(positionAttributeLocation);
+gl.vertexAttribPointer(positionAttributeLocation, 2, gl.FLOAT, false, 0, 0);
 
-    const resLoc = gl.getUniformLocation(program, "u_resolution");
-    const timeLoc = gl.getUniformLocation(program, "u_time");
-    const volLoc = gl.getUniformLocation(program, "u_vol");
-    const bassLoc = gl.getUniformLocation(program, "u_bass");
-    const trebleLoc = gl.getUniformLocation(program, "u_treble");
+const resLoc = gl.getUniformLocation(program, "u_resolution");
+const timeLoc = gl.getUniformLocation(program, "u_time");
+const volLoc = gl.getUniformLocation(program, "u_vol");
+const bassLoc = gl.getUniformLocation(program, "u_bass");
+const trebleLoc = gl.getUniformLocation(program, "u_treble");
 
-    let analyser, freqData, audioContextCreated = false;
-    let sVol = 0, sBass = 0, sTreble = 0;
+let analyser, freqData, audioContextCreated = false;
+let sVol = 0, sBass = 0, sTreble = 0;
+const sm = 0.04; // Molasses-like low pass filter modifier
 
-    // Smooth moving multiplier
-    const sm = 0.04; 
+startBtn.addEventListener("click", async () => {
+    if (audioContextCreated) return;
 
-    startBtn.addEventListener("click", async () => {
-        if (audioContextCreated) return;
-
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            analyser = audioCtx.createAnalyser();
-            analyser.fftSize = 512;
-            analyser.smoothingTimeConstant = 0.8; 
-            
-            freqData = new Uint8Array(analyser.frequencyBinCount);
-            const source = audioCtx.createMediaStreamSource(stream);
-            source.connect(analyser);
-
-            startBtn.classList.add("active");
-            audioContextCreated = true;
-        } catch (err) {
-            console.error("Microphone hardware configuration link error:", err);
-            startBtn.textContent = "Error Accessing Mic";
-        }
-    });
-
-    function processAudioData() {
-        if (!analyser) return { vol: 0, bass: 0, treble: 0 };
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        analyser = audioCtx.createAnalyser();
+        analyser.fftSize = 512;
+        analyser.smoothingTimeConstant = 0.85; // Heavy audio integration dampener
         
-        analyser.getByteFrequencyData(freqData);
+        freqData = new Uint8Array(analyser.frequencyBinCount);
+        const source = audioCtx.createMediaStreamSource(stream);
+        source.connect(analyser);
 
-        let volSum = 0, bassSum = 0, trebleSum = 0;
-        const totalBins = freqData.length;
-        const bassRange = Math.floor(totalBins * 0.15);
-        const trebleStart = Math.floor(totalBins * 0.45);
+        startBtn.classList.add("active");
+        audioContextCreated = true;
+    } catch (err) {
+        console.error("Microphone pipeline link error:", err);
+        startBtn.textContent = "Error Accessing Mic";
+    }
+});
 
-        for (let i = 0; i < totalBins; i++) {
-            const val = freqData[i];
-            volSum += val;
-            if (i < bassRange) bassSum += val;
-            if (i >= trebleStart) trebleSum += val;
-        }
+function processAudioData() {
+    if (!analyser) return { vol: 0, bass: 0, treble: 0 };
+    
+    analyser.getByteFrequencyData(freqData);
 
-        return {
-            vol: (volSum / totalBins) / 255,
-            bass: (bassSum / bassRange) / 255,
-            treble: (trebleSum / (totalBins - trebleStart)) / 255
-        };
+    let volSum = 0, bassSum = 0, trebleSum = 0;
+    const totalBins = freqData.length;
+    const bassRange = Math.floor(totalBins * 0.15);
+    const trebleStart = Math.floor(totalBins * 0.45);
+
+    for (let i = 0; i < totalBins; i++) {
+        const val = freqData[i];
+        volSum += val;
+        if (i < bassRange) bassSum += val;
+        if (i >= trebleStart) trebleSum += val;
     }
 
-    function resizeCanvas() {
-        if (canvas.width !== window.innerWidth || canvas.height !== window.innerHeight) {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
-        }
+    return {
+        vol: (volSum / totalBins) / 255,
+        bass: (bassSum / bassRange) / 255,
+        treble: (trebleSum / (totalBins - trebleStart)) / 255
+    };
+}
+
+function resizeCanvas() {
+    if (canvas.width !== window.innerWidth || canvas.height !== window.innerHeight) {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+    }
+}
+
+let lastTime = 0;
+let t = 0;
+
+function animate(timestamp) {
+    requestAnimationFrame(animate);
+    resizeCanvas();
+
+    const delta = (timestamp - lastTime) * 0.001;
+    lastTime = timestamp;
+    t += delta * 0.5; // Scale global engine speed downward for slow transformation
+
+    let rawAudio = processAudioData();
+
+    if (audioContextCreated) {
+        sVol = sVol * (1 - sm) + rawAudio.vol * sm;
+        sBass = sBass * (1 - sm) + rawAudio.bass * sm;
+        sTreble = sTreble * (1 - sm) + rawAudio.treble * sm;
+    } else {
+        sVol = sVol * 0.98 + 0.06 * 0.02;
+        sBass = sBass * 0.98 + 0.08 * 0.02;
+        sTreble = sTreble * 0.98 + 0.04 * 0.02;
     }
 
-    let lastTime = 0;
-    let t = 0;
+    gl.clearColor(0.0, 0.002, 0.01, 1.0);
+    gl.clear(gl.COLOR_BUFFER_BIT);
 
-    function animate(timestamp) {
-        requestAnimationFrame(animate);
-        resizeCanvas();
+    gl.useProgram(program);
+    gl.bindVertexArray(vao);
 
-        const delta = (timestamp - lastTime) * 0.001;
-        lastTime = timestamp;
-        t += delta * 0.6; // Hypnotic scale speed modifier
+    gl.uniform2f(resLoc, gl.canvas.width, gl.canvas.height);
+    gl.uniform1f(timeLoc, t);
+    gl.uniform1f(volLoc, sVol * 4.5);
+    gl.uniform1f(bassLoc, sBass * 4.0);
+    gl.uniform1f(trebleLoc, sTreble * 5.0);
 
-        let rawAudio = processAudioData();
+    gl.drawArrays(gl.TRIANGLES, 0, 6);
+}
 
-        if (audioContextCreated) {
-            sVol = sVol * (1 - sm) + rawAudio.vol * sm;
-            sBass = sBass * (1 - sm) + rawAudio.bass * sm;
-            sTreble = sTreble * (1 - sm) + rawAudio.treble * sm;
-        } else {
-            sVol = sVol * 0.95 + 0.04 * 0.05;
-            sBass = sBass * 0.95 + 0.06 * 0.05;
-            sTreble = sTreble * 0.95 + 0.03 * 0.05;
-        }
-
-        gl.clearColor(0.001, 0.0, 0.002, 1.0);
-        gl.clear(gl.COLOR_BUFFER_BIT);
-
-        gl.useProgram(program);
-        gl.bindVertexArray(vao);
-
-        gl.uniform2f(resLoc, gl.canvas.width, gl.canvas.height);
-        gl.uniform1f(timeLoc, t);
-        gl.uniform1f(volLoc, sVol * 4.5);
-        gl.uniform1f(bassLoc, sBass * 4.0);
-        gl.uniform1f(trebleLoc, sTreble * 5.0);
-
-        gl.drawArrays(gl.TRIANGLES, 0, 6);
-    }
-
-    animate(0);
+animate(0);
 </script>
 </body>
 </html>
